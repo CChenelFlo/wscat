@@ -159,7 +159,7 @@ program
   )
   .option('-s, --subprotocol <protocol>', 'optional subprotocol', collect, [])
   .option('-w, --wait <seconds>', 'wait given seconds after executing command')
-  .option('-x, --execute <command>', 'execute command after connecting')
+  .option('-x, --execute <command>', 'execute command after connecting : Repeat to set multiple ', collect, [])
   .parse(process.argv);
 
 const programOptions = program.opts();
@@ -274,7 +274,17 @@ if (programOptions.listen) {
 
     ws.on('open', () => {
       if (programOptions.execute) {
-        ws.send(programOptions.execute);
+
+          programOptions.execute.forEach(exec => {
+  
+            wsConsole.print(
+              Console.Types.Error,
+              'sending: ' + exec,
+              Console.Colors.Yellow
+            );
+              ws.send(exec);
+          })
+
         setTimeout(
           () => {
             ws.close();
