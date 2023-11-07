@@ -272,18 +272,38 @@ if (programOptions.listen) {
 
     const ws = new WebSocket(connectUrl, programOptions.subprotocol, options);
 
-    ws.on('open', () => {
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function processCommands() {
+      for (const exec of programOptions.execute) {
+        await delay(programOptions.wait * 1000); // Wait for 1000 milliseconds (1 second)
+        wsConsole.print(
+          Console.Types.Error,
+          'sending with delay: ' + exec,
+          Console.Colors.Yellow
+        );
+          ws.send(exec);
+      }
+    }
+
+    ws.on('open', async () => {
       if (programOptions.execute) {
 
-          programOptions.execute.forEach(exec => {
-  
-            wsConsole.print(
-              Console.Types.Error,
-              'sending: ' + exec,
-              Console.Colors.Yellow
-            );
+        if(programOptions.wait){
+          await processCommands();
+        }
+        else{
+            programOptions.execute.forEach(exec => {
+              wsConsole.print(
+                Console.Types.Error,
+                'sending: ' + exec,
+                Console.Colors.Yellow
+              );
               ws.send(exec);
-          })
+            });
+          }
 
         setTimeout(
           () => {
